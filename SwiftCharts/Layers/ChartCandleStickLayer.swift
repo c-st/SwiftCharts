@@ -12,17 +12,17 @@ import UIKit
 open class ChartCandleStickLayer<T: ChartPointCandleStick>: ChartPointsLayer<T> {
     
     fileprivate var screenItems: [CandleStickScreenItem] = []
-
+    
     fileprivate let itemWidth: CGFloat
     fileprivate let strokeWidth: CGFloat
-    fileprivate let increasingColor: UIColor
-    fileprivate let decreasingColor: UIColor
+    fileprivate let bullishColor: UIColor
+    fileprivate let bearishColor: UIColor
     
     public init(xAxis: ChartAxis, yAxis: ChartAxis, chartPoints: [T], itemWidth: CGFloat = 10, strokeWidth: CGFloat = 1, increasingColor: UIColor = UIColor.black, decreasingColor: UIColor = UIColor.white) {
         self.itemWidth = itemWidth
         self.strokeWidth = strokeWidth
-        self.increasingColor = increasingColor
-        self.decreasingColor = decreasingColor
+        self.bullishColor = increasingColor
+        self.bearishColor = decreasingColor
         
         super.init(xAxis: xAxis, yAxis: yAxis, chartPoints: chartPoints)
     }
@@ -35,19 +35,30 @@ open class ChartCandleStickLayer<T: ChartPointCandleStick>: ChartPointsLayer<T> 
     
     override open func chartContentViewDrawing(context: CGContext, chart: Chart) {
         for screenItem in screenItems {
+            let shadowColor = screenItem.fillColor.cgColor
+            
             context.setLineWidth(strokeWidth)
-            context.setStrokeColor(UIColor.black.cgColor)
+            
+            // top shadow
             context.move(to: CGPoint(x: screenItem.x, y: screenItem.lineTop))
-            context.addLine(to: CGPoint(x: screenItem.x, y: screenItem.lineBottom))
+            context.setStrokeColor(shadowColor)
+            context.addLine(to: CGPoint(x: screenItem.x, y: screenItem.rect.origin.y))
             context.strokePath()
             
-            context.setFillColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0)
+            // bottom shadow
+            context.move(to: CGPoint(x: screenItem.x, y: screenItem.lineBottom))
+            context.setStrokeColor(shadowColor)
+            context.addLine(to: CGPoint(x: screenItem.x, y: screenItem.rect.origin.y + screenItem.rect.height))
+            context.strokePath()
+            
+            // body
+            context.setStrokeColor(screenItem.fillColor.cgColor)
             context.setFillColor(screenItem.fillColor.cgColor)
             context.fill(screenItem.rect)
             context.stroke(screenItem.rect)
         }
     }
-
+    
     fileprivate func generateScreenItems() -> [CandleStickScreenItem] {
         return chartPointsModels.map {model in
             
@@ -60,7 +71,7 @@ open class ChartCandleStickLayer<T: ChartPointCandleStick>: ChartPointsLayer<T> 
             let openScreenY = modelLocToScreenLoc(x: Double(x), y: Double(chartPoint.open)).y
             let closeScreenY = modelLocToScreenLoc(x: Double(x), y: Double(chartPoint.close)).y
             
-            let (rectTop, rectBottom, fillColor) = closeScreenY < openScreenY ? (closeScreenY, openScreenY, self.increasingColor) : (openScreenY, closeScreenY, self.decreasingColor)
+            let (rectTop, rectBottom, fillColor) = closeScreenY < openScreenY ? (closeScreenY, openScreenY, self.bullishColor) : (openScreenY, closeScreenY, self.bearishColor)
             return CandleStickScreenItem(x: x, lineTop: highScreenY, lineBottom: lowScreenY, rectTop: rectTop, rectBottom: rectBottom, width: itemWidth, fillColor: fillColor)
         }
     }
@@ -88,3 +99,4 @@ private struct CandleStickScreenItem {
     }
     
 }
+
