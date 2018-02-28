@@ -17,12 +17,14 @@ open class ChartCandleStickLayer<T: ChartPointCandleStick>: ChartPointsLayer<T> 
     fileprivate let strokeWidth: CGFloat
     fileprivate let bullishColor: UIColor
     fileprivate let bearishColor: UIColor
+    fileprivate let outlineColor: UIColor?
     
-    public init(xAxis: ChartAxis, yAxis: ChartAxis, chartPoints: [T], itemWidth: CGFloat = 10, strokeWidth: CGFloat = 1, increasingColor: UIColor = UIColor.black, decreasingColor: UIColor = UIColor.white) {
+    public init(xAxis: ChartAxis, yAxis: ChartAxis, chartPoints: [T], itemWidth: CGFloat = 10, strokeWidth: CGFloat = 1, bearishColor: UIColor = UIColor.black, bullishColor: UIColor = UIColor.white, outlineColor: UIColor? = nil) {
         self.itemWidth = itemWidth
         self.strokeWidth = strokeWidth
-        self.bullishColor = increasingColor
-        self.bearishColor = decreasingColor
+        self.bullishColor = bullishColor
+        self.bearishColor = bearishColor
+        self.outlineColor = outlineColor
         
         super.init(xAxis: xAxis, yAxis: yAxis, chartPoints: chartPoints)
     }
@@ -35,7 +37,7 @@ open class ChartCandleStickLayer<T: ChartPointCandleStick>: ChartPointsLayer<T> 
     
     override open func chartContentViewDrawing(context: CGContext, chart: Chart) {
         for screenItem in screenItems {
-            let shadowColor = screenItem.fillColor.cgColor
+            let shadowColor = outlineColor !== nil ? outlineColor!.cgColor : screenItem.fillColor.cgColor
             
             context.setLineWidth(strokeWidth)
             
@@ -52,7 +54,7 @@ open class ChartCandleStickLayer<T: ChartPointCandleStick>: ChartPointsLayer<T> 
             context.strokePath()
             
             // body
-            context.setStrokeColor(screenItem.fillColor.cgColor)
+            context.setStrokeColor(shadowColor)
             context.setFillColor(screenItem.fillColor.cgColor)
             context.fill(screenItem.rect)
             context.stroke(screenItem.rect)
@@ -99,4 +101,3 @@ private struct CandleStickScreenItem {
     }
     
 }
-
