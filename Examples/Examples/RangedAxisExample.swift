@@ -140,7 +140,7 @@ class RangedAxisExample: UIViewController {
             let center = chartPointModel.screenLoc
             let label = UILabel(frame: CGRect(x: chart.containerView.frame.maxX, y: center.y - h / 2, width: w, height: h))
             label.backgroundColor = {
-                return chartPointsLineLayer.lineModels[chartPointModel.index].lineColor
+                return chartPointsLineLayer.lineModels[chartPointModel.index].lineColors.first ?? UIColor.white
             }()
             
             label.textAlignment = NSTextAlignment.center
@@ -239,7 +239,7 @@ class RangedAxisExample: UIViewController {
     }
     
     
-    func rotated() {
+    @objc func rotated() {
         let orientation = UIApplication.shared.statusBarOrientation
         guard (lastOrientation.map{$0.rawValue != orientation.rawValue} ?? true) else {return}
         
